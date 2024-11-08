@@ -16,6 +16,13 @@ cmd_vel_pub = rospy.Publisher('/head/cmd_vel', Twist, queue_size=10)
 cmd_vel = Twist()
 
 
+PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
+Можешь использовать любые функции Python, включая time.sleep и т. д.
+Для управления используй следующие функции:
+set_velocity(x, y, z) - установить скорость движения робота.
+Напиши программу в соответствие с запросом пользователя:
+'''
+
 def gpt(prompt: str) -> str:
     return 'import time\nset_velocity(1, 0, 0)\ntime.sleep(3)\nset_velocity(0, 0, 0)'
 
