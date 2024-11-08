@@ -7,6 +7,8 @@ import time
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 
+from gpt_interact import prompt as ask_gpt
+
 rospy.init_node('morsai')
 rospy.loginfo('Start MORSAI')
 
@@ -15,9 +17,9 @@ cmd_vel_pub = rospy.Publisher('/head/cmd_vel', Twist, queue_size=10)
 
 cmd_vel = Twist()
 
-PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
+SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
 Можешь использовать любые функции Python, включая time.sleep и т. д.
-Выдай в ответ только программу на Python, без форматирования.
+Выдай в ответ только программу на Python, без форматирования и без ```.
 Для управления используй следующие функции:
 set_velocity(x, y, z) - установить скорость движения робота.
 Считай, что функции для управления роботом уже объявлены.
@@ -27,7 +29,7 @@ set_velocity(x, y, z) - установить скорость движения �
 '''
 
 def gpt(prompt: str) -> str:
-    return 'import time\nset_velocity(1, 0, 0)\ntime.sleep(3)\nset_velocity(0, 0, 0)'
+    return ask_gpt(SYSTEM_PROMPT, prompt)
 
 
 def stop():
@@ -56,6 +58,7 @@ publish_timer = rospy.Timer(rospy.Duration(1 / 10), publish_cmd_vel)
 
 print('Input prompt')
 program = gpt(input())
+print(program)
 g = {'set_velocity': set_velocity}
 exec(program, g)
 
