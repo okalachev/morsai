@@ -2,7 +2,7 @@ import subprocess
 
 
 def speak(text: str):
-    rate = 155
+    rate = 100
     pitch = 30
     voice = 'ru'
     # subprocess.call(['espeak', '-v', voice, text])
