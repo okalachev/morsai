@@ -3,6 +3,7 @@
 import rospy
 import atexit
 import time
+from speak import speak
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
@@ -22,6 +23,7 @@ SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Те
 Выдай в ответ только программу на Python, без форматирования и без ```.
 Для управления используй следующие функции:
 set_velocity(x, y, z, yaw) - установить скорость движения робота. x - это скорость вперед, y - это скорость налево, z - это скорость вверх (не задействовано), yaw — это угловая скорость в рад/с (против часовой).
+speak(text) - произнести текст.
 Считай, что функции для управления роботом уже объявлены.
 Максимальная скорость движения робота по x - 0.5 м/с, а по y - 0.2 м/с, по yaw - 0.85 рад/с.
 Код будет выполнять при помощи функции exec.
@@ -56,14 +58,15 @@ def publish_cmd_vel(event):
     status_pub.publish(True)
 
 
-publish_timer = rospy.Timer(rospy.Duration(1 / 10), publish_cmd_vel)
+publish_timer = rospy.Timer(rospy.Duration(1 / 50), publish_cmd_vel)
 
 
-print('Input prompt')
-program = gpt(input())
-print(program)
-g = {'set_velocity': set_velocity}
-exec(program, g)
-
-
-rospy.spin()
+while True:
+    print('Input prompt')
+    prompt = input()
+    if not prompt:
+        break
+    program = gpt(prompt)
+    print(program)
+    g = {'set_velocity': set_velocity, 'speak': speak}
+    exec(program, g)
