@@ -4,10 +4,11 @@ import rospy
 import atexit
 import time
 from speak import speak
+import util
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
-from sensor_msgs.msg import BatteryState
+from sensor_msgs.msg import BatteryState, Imu
 
 from gpt_interact import prompt as ask_gpt
 
@@ -27,6 +28,9 @@ SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Те
 set_velocity(x, y, z, yaw) - установить скорость движения робота. x - это скорость вперед, y - это скорость налево, z - это скорость вверх (не задействовано), yaw — это угловая скорость в рад/с (против часовой).
 speak(text) - произнести текст.
 get_battery_voltage() - получить напряжение батареи в вольтах.
+get_pitch() - получить угол по тангажу в радинах.
+get_roll() - получить угол по крену в радианах.
+get_yaw() - получить угол по рысканью в радианах.
 Считай, что функции для управления роботом уже объявлены.
 Максимальная скорость движения робота по x - 0.5 м/с, а по y - 0.2 м/с, по yaw - 0.85 рад/с.
 Учитывай, что 180 градусов это 3.14 радиан.
@@ -60,8 +64,31 @@ def battery_callback(msg):
 rospy.Subscriber('/bat', BatteryState, battery_callback)
 
 
+def imu_callback(msg):
+    global imu_data
+    imu_data = msg
+
+
+rospy.Subscriber('/imu/data', Imu, imu_callback)
+
+
 def get_battery_voltage():
     return battery_state.voltage
+
+
+def get_pitch():
+    yaw, pitch, roll = util.euler_from_orientation(imu_data.orientation)
+    return pitch
+
+
+def get_roll():
+    yaw, pitch, roll = util.euler_from_orientation(imu_data.orientation)
+    return roll
+
+
+def get_yaw():
+    yaw, pitch, roll = util.euler_from_orientation(imu_data.orientation)
+    return yaw
 
 
 def set_velocity(x, y, z, yaw):
@@ -90,5 +117,6 @@ while True:
         break
     program = gpt(prompt)
     print(program)
-    g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage}
+    g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
+            'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw}
     exec(program, g)
