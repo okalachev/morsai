@@ -7,6 +7,7 @@ from speak import speak
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
+from sensor_msgs.msg import BatteryState
 
 from gpt_interact import prompt as ask_gpt
 
@@ -17,6 +18,7 @@ status_pub = rospy.Publisher('/head/status', Bool, queue_size=1)
 cmd_vel_pub = rospy.Publisher('/head/cmd_vel', Twist, queue_size=1)
 
 cmd_vel = Twist()
+battery_state = BatteryState()
 
 SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
 Можешь использовать любые функции Python, включая time.sleep и т. д. Только не забывай импортировать нужные модули.
@@ -24,6 +26,7 @@ SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Те
 Для управления используй следующие функции:
 set_velocity(x, y, z, yaw) - установить скорость движения робота. x - это скорость вперед, y - это скорость налево, z - это скорость вверх (не задействовано), yaw — это угловая скорость в рад/с (против часовой).
 speak(text) - произнести текст.
+get_battery_voltage() - получить напряжение батареи в вольтах.
 Считай, что функции для управления роботом уже объявлены.
 Максимальная скорость движения робота по x - 0.5 м/с, а по y - 0.2 м/с, по yaw - 0.85 рад/с.
 Учитывай, что 180 градусов это 3.14 радиан.
@@ -31,6 +34,7 @@ speak(text) - произнести текст.
 По yaw он вращается в два раза медленнее, чем задано, учитывай это при расчете времени.
 Положительная скорость по yaw - это вращение против часовой, то есть налево.
 Отрицательная скорость по yaw - это вращение по часовой, то есть направо.
+Напряжение батареи - это общее напряжение на 6 банках. Полная зарядка - это 4.2 В на банку, а разряженная - это 3.7 В на банку.
 Код будет выполнять при помощи функции exec.
 Напиши программу в соответствие с запросом пользователя:
 '''
@@ -46,6 +50,19 @@ def stop():
     time.sleep(1)
 
 rospy.on_shutdown(stop)
+
+
+def battery_callback(msg):
+    global battery_state
+    battery_state = msg
+
+
+rospy.Subscriber('/bat', BatteryState, battery_callback)
+
+
+def get_battery_voltage():
+    return battery_state.voltage
+
 
 def set_velocity(x, y, z, yaw):
     if yaw != 0 and abs(x) < 0.1:
@@ -73,5 +90,5 @@ while True:
         break
     program = gpt(prompt)
     print(program)
-    g = {'set_velocity': set_velocity, 'speak': speak}
+    g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage}
     exec(program, g)
