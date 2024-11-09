@@ -12,7 +12,7 @@ rospy.wait_for_service('playSound')
 service_playSound = rospy.ServiceProxy('playSound', playSound, persistent=True)
 
 
-def speak_ai(text: str):
+def speak_ai(text: str, sync: bool = True):
     print('Speak AI: ', text)
     speech_file_path = Path(__file__).parent / "speech.mp3"
 
@@ -32,7 +32,7 @@ def speak_ai(text: str):
     print('Sound generated, play')
     request = playSoundRequest()
     request.FileName = "/home/pi/morsai/speech_louder.mp3"
-    request.IsBreakable = 0
+    request.IsBreakable = sync
     service_playSound(request)
 
 
