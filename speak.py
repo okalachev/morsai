@@ -18,7 +18,7 @@ def speak_ai(text: str, sync: bool = True):
 
     response = client.audio.speech.create(
     model="tts-1",
-    voice="shimmer",
+    voice="alloy",
     input=text, 
     response_format="mp3",
     speed="0.8"
