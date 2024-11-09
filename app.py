@@ -22,6 +22,7 @@ cmd_pose_pub = rospy.Publisher('/head/cmd_pose', Twist, queue_size=1)
 
 rospy.wait_for_service('robot_mode')
 set_mode = rospy.ServiceProxy('robot_mode', QuadrupedCmd)
+robot_action = rospy.ServiceProxy('robot_action', QuadrupedCmd)
 
 cmd_vel = Twist()
 cmd_pose = Twist()
@@ -34,6 +35,8 @@ SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Те
 set_velocity(x, y, z, yaw) - установить скорость движения робота. x - это скорость вперед, y - это скорость налево, z - это скорость вверх (не задействовано), yaw — это угловая скорость в рад/с (против часовой).
 sit() - сесть.
 stand() - встать.
+give_hand() - подать лапу.
+wave_hand() - помахать лапой.
 speak(text) - произнести текст.
 get_battery_voltage() - получить напряжение батареи в вольтах.
 get_pitch() - получить угол по тангажу в радинах.
@@ -119,6 +122,14 @@ def stand():
     set_mode(0)  # control velocity
 
 
+def give_hand():
+    robot_action(3)
+
+
+def wave_hand():
+    robot_action(5)
+
+
 def set_velocity(x, y, z, yaw):
     set_mode(0)
     if yaw != 0 and abs(x) < 0.1:
@@ -146,5 +157,6 @@ while True:
     program = gpt(prompt)
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
-            'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw, 'sit': sit, 'stand': stand}
+            'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw, 'sit': sit, 'stand': stand,
+            'give_hand': give_hand, 'wave_hand': wave_hand}
     exec(program, g)
