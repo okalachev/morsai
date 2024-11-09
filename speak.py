@@ -42,6 +42,6 @@ def speak(text: str):
 
 if __name__ == '__main__':
     rospy.init_node("speaker")
-    # speak_ai('Раз, два, три, четыре, пять, я хочу выйти погулять')
+    speak_ai('Раз, два, три, четыре, пять, я хочу выйти погулять')
+    print('done')
     # speak('Гаф гаф!')
-    pass
