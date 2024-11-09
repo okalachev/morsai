@@ -26,6 +26,7 @@ while not rospy.is_shutdown():
     r.sleep()
 
     cmd_vel = Twist()
+    # cmd_vel.linear.x = 1
     cmd_vel.linear.x = 0.1
     # cmd_vel.angular.z = -0.85
 
@@ -40,8 +41,9 @@ while not rospy.is_shutdown():
     r.sleep()
 
     cmd_vel = Twist()
+    # cmd_vel.linear.x = 1
     cmd_vel.linear.x = 0.0
-    # cmd_vel.angular.z = 0
+    # cmd_vel.angular.z = -0.85
 
     cmd_vel_pub.publish(cmd_vel)
     status_pub.publish(True)
