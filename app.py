@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+
 import atexit
 import time
 from speak import speak
