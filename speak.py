@@ -8,8 +8,12 @@ from secret import OPENAI_API_KEY
 
 
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openai.batalov.me/v1")
+rospy.wait_for_service('playSound')
+service_playSound = rospy.ServiceProxy('playSound', playSound, persistent=True)
+
 
 def speak_ai(text: str):
+    print('Speak AI: ', text)
     speech_file_path = Path(__file__).parent / "speech.mp3"
 
     response = client.audio.speech.create(
@@ -25,7 +29,7 @@ def speak_ai(text: str):
     louder_audio = audio + 20
     louder_audio.export("/home/pi/morsai/speech_louder.mp3", format="mp3")
 
-    service_playSound = rospy.ServiceProxy('playSound', playSound)
+    print('Sound generated, play')
     request = playSoundRequest()
     request.FileName = "/home/pi/morsai/speech_louder.mp3"
     request.IsBreakable = 0
