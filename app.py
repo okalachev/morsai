@@ -7,7 +7,7 @@ from speak import speak
 import util
 
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 from sensor_msgs.msg import BatteryState, Imu
 from mors.srv import QuadrupedCmd
 
@@ -149,14 +149,26 @@ def publish_cmd_vel(event):
 publish_timer = rospy.Timer(rospy.Duration(1 / 50), publish_cmd_vel)
 
 
-while True:
-    print('Input prompt')
-    prompt = input()
-    if not prompt:
-        break
+def do_command(prompt):
     program = gpt(prompt)
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
             'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw, 'sit': sit, 'stand': stand,
             'give_hand': give_hand, 'wave_hand': wave_hand}
     exec(program, g)
+
+
+def voice_command(msg):
+    print('Do voice command: ', msg.data)
+    do_command(msg.data)
+
+
+rospy.Subscriber('/voice_command', String, voice_command)
+
+
+while True:
+    print('Input prompt')
+    prompt = input()
+    if not prompt:
+        break
+    do_command(prompt)
