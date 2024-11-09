@@ -9,6 +9,7 @@ import util
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
 from sensor_msgs.msg import BatteryState, Imu
+from mors.srv import QuadrupedCmd
 
 from gpt_interact import prompt as ask_gpt
 
@@ -17,8 +18,13 @@ rospy.loginfo('Start MORSAI')
 
 status_pub = rospy.Publisher('/head/status', Bool, queue_size=1)
 cmd_vel_pub = rospy.Publisher('/head/cmd_vel', Twist, queue_size=1)
+cmd_pose_pub = rospy.Publisher('/head/cmd_pose', Twist, queue_size=1)
+
+rospy.wait_for_service('robot_mode')
+set_mode = rospy.ServiceProxy('robot_mode', QuadrupedCmd)
 
 cmd_vel = Twist()
+cmd_pose = Twist()
 battery_state = BatteryState()
 
 SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
@@ -26,6 +32,8 @@ SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Те
 Выдай в ответ только программу на Python, без форматирования и без ```.
 Для управления используй следующие функции:
 set_velocity(x, y, z, yaw) - установить скорость движения робота. x - это скорость вперед, y - это скорость налево, z - это скорость вверх (не задействовано), yaw — это угловая скорость в рад/с (против часовой).
+sit() - сесть.
+stand() - встать.
 speak(text) - произнести текст.
 get_battery_voltage() - получить напряжение батареи в вольтах.
 get_pitch() - получить угол по тангажу в радинах.
@@ -91,19 +99,39 @@ def get_yaw():
     return yaw
 
 
+def get_angular_z(yaw_rate, x):
+    # radius = 1 - z https://github.com/voltdog/mors_base/blob/b90d7/locomotion_controller/scripts/zmp_controller/robot_controller.py#L467
+    radius = x / yaw_rate
+    z = 1 - radius
+    return z
+
+
+def sit():
+    set_mode(2)  # control "pose"
+    cmd_pose.angular.y = 0.5
+
+
+def stand():
+    while cmd_pose.angular.y > 0:
+        cmd_pose.angular.y -= 0.01
+        cmd_pose_pub.publish(cmd_pose)
+        rospy.sleep(0.02)
+    set_mode(0)  # control velocity
+
+
 def set_velocity(x, y, z, yaw):
+    set_mode(0)
     if yaw != 0 and abs(x) < 0.1:
         x = 0.1
     cmd_vel.linear.x = x
     cmd_vel.linear.y = y
     cmd_vel.linear.z = z
-    cmd_vel.angular.z = yaw
-    # cmd_vel_pub.publish(cmd_vel)
-    # status_pub.publish(True)
+    cmd_vel.angular.z = yaw # get_angular_z(yaw, x) # TODO:
 
 
 def publish_cmd_vel(event):
     cmd_vel_pub.publish(cmd_vel)
+    cmd_pose_pub.publish(cmd_pose)
     status_pub.publish(True)
 
 
@@ -118,5 +146,5 @@ while True:
     program = gpt(prompt)
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
-            'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw}
+            'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw, 'sit': sit, 'stand': stand}
     exec(program, g)
