@@ -6,7 +6,6 @@ import rospy
 from speakers_controller.srv import playSound, playSoundRequest
 from secret import OPENAI_API_KEY
 
-rospy.init_node("example_speakers_controller_playSound_node")
 
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openai.batalov.me/v1")
 
@@ -42,6 +41,7 @@ def speak(text: str):
 
 
 if __name__ == '__main__':
+    rospy.init_node("speaker")
     # speak_ai('Раз, два, три, четыре, пять, я хочу выйти погулять')
     # speak('Гаф гаф!')
     pass

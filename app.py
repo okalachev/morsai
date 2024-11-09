@@ -3,7 +3,7 @@
 import rospy
 import atexit
 import time
-from speak import speak
+from speak import speak_ai as speak
 import util
 
 from geometry_msgs.msg import Twist
