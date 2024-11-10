@@ -15,7 +15,7 @@ pics = {1: 'attention',
 
 def image_change(pic_number: int):
     script_path = os.path.dirname(os.path.abspath(__file__))
-    service_display_player(script_path+'/{}.png'.format(pics[pic_number]))
+    service_display_player(script_path+'/faces/{}.png'.format(pics[pic_number]))
 
 
 
