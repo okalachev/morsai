@@ -14,6 +14,9 @@ from sensor_msgs.msg import BatteryState, Imu
 from mors.srv import QuadrupedCmd
 
 from gpt_interact import prompt as ask_gpt
+from secret import OPENAI_API_KEY
+from describing.describe import DescribeImage
+from describing.image_processing import ImageProcessing
 
 print('init node')
 rospy.init_node('morsai')
@@ -33,6 +36,8 @@ print('done')
 cmd_vel = Twist()
 cmd_pose = Twist()
 battery_state = BatteryState()
+image_processor = ImageProcessing()
+image_describer = DescribeImage(OPENAI_API_KEY)
 
 SYSTEM_PROMPT = '''Ты управляешь роботом-собакой. Тебе нужно написать программу на Python для нее.
 Можешь использовать любые функции Python, включая time.sleep и т. д. Только не забывай импортировать нужные модули.
@@ -44,6 +49,7 @@ stand() - встать.
 give_hand() - подать лапу.
 wave_hand() - помахать лапой.
 speak(text) - произнести текст.
+get_description() - что изабражено на изображении.
 get_battery_voltage() - получить напряжение батареи в вольтах.
 get_pitch() - получить угол по тангажу в радинах.
 get_roll() - получить угол по крену в радианах.
@@ -87,6 +93,13 @@ def imu_callback(msg):
 
 
 rospy.Subscriber('/imu/data', Imu, imu_callback)
+
+
+def get_description():
+    image_processor.capture_image_ros()
+    base64_image = image_processor.encode_image()
+    description = image_describer.send_image_to_openai(base64_image)
+    return description
 
 
 def get_battery_voltage():
