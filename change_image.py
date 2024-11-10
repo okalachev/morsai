@@ -1,5 +1,5 @@
 import rospy # Библиотека для работы с ROS
-import os
+from pathlib import Path
 
 from display_controller.srv import displayControllerPlay
 
@@ -14,8 +14,10 @@ pics = {1: 'attention',
         8: 'thinking'}
 
 def image_change(pic_number: int):
-    script_path = os.path.dirname(os.path.abspath(__file__))
-    service_display_player(script_path+'/faces/{}.png'.format(pics[pic_number]))
+    script_path = Path(__file__).parent
+    path = str(script_path / 'faces' / '{}.png'.format(pics[pic_number]))
+    service_display_player(path)
+    print(path)
 
 
 

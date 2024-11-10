@@ -51,7 +51,7 @@ stand() - встать.
 give_hand() - подать лапу.
 wave_hand() - помахать лапой.
 speak(text) - произнести текст.
-get_description() - получить описание текущего кадра с камеры на голове робота-собаки.
+get_description(prompt) - получить описание текущего кадра с камеры на голове робота-собаки. В параметр prompt помести запрос о том, что ты хочешь узнать о картинке. Для проверки наличия предмета, спроси есть ли он в кадре, и попроси ответить "да" или "нет", после можешь использовать проверку на вхождение подстроки в результате, например, "да" или "нет".
 get_battery_voltage() - получить напряжение батареи в вольтах.
 get_pitch() - получить угол по тангажу в радинах.
 get_roll() - получить угол по крену в радианах.
@@ -74,7 +74,6 @@ image_change(number) - изменить изображение на камере
 Не используй вывод через print, используй функцию speak. Не выводи текст вместо программы, используй функцию speak. Произноси текст по-русски.
 Не делай лишних действий (например, если я прошу только что-то сказать, не нужно вставать и садиться).
 Код будет выполняться при помощи функции exec.
-Выдай в ответ только программу на Python, без форматирования и без ```.
 Напиши программу в соответствии с запросом пользователя:
 '''
 
@@ -107,10 +106,11 @@ def imu_callback(msg):
 rospy.Subscriber('/imu/data', Imu, imu_callback)
 
 
-def get_description():
+def get_description(prompt=None):
+    time.sleep(3)
     image_processor.capture_image_ros()
     base64_image = image_processor.encode_image()
-    description = image_describer.send_image_to_openai(base64_image)
+    description = image_describer.send_image_to_openai(base64_image, prompt=prompt)
     return description
 
 
@@ -191,6 +191,7 @@ publish_timer = rospy.Timer(rospy.Duration(1 / 50), publish_cmd_vel)
 
 def do_command(prompt):
     program = gpt(prompt)
+    prompt = prompt.replace("```python", "").replace("```", "")
     program = 'import time\n' + program
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
