@@ -8,7 +8,7 @@ from image_processing import ImageProcessing
 
 def main():
     image_processor = ImageProcessing()
-    image_processor.capture_image()
+    image_processor.capture_image_ros()
     base64_image = image_processor.encode_image()
 
     image_describer = DescribeImage(OPENAI_API_KEY)
