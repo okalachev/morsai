@@ -130,7 +130,7 @@ def on_asr_topic(flag: Bool):
         print("asr start")
         time.sleep(1)
         audio_sub = rospy.Subscriber("/head/respeaker/speech_audio", AudioData, on_audio)
-        timer = Timer(10, stop)
+        timer = Timer(20, stop)
         timer.start()
 
 
