@@ -44,6 +44,12 @@ def speak(text: str):
     # subprocess.call(['espeak', '-v', voice, text])
     subprocess.call(['espeak', '-s', str(rate), '-p', str(pitch), '-v', voice, text])
 
+def speak_start_thinking():
+    request = playSoundRequest()
+    request.FileName = "/home/pi/morsai/wait.mp3"
+    request.IsBreakable = 0
+    service_playSound(request)
+
 
 if __name__ == '__main__':
     rospy.init_node("speaker")

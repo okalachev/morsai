@@ -10,6 +10,8 @@ from threading import Timer, Lock
 import time
 from copy import copy
 
+from speak import speak_start_thinking
+
 import wave
 
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openai.batalov.me/v1")
@@ -83,6 +85,7 @@ def timer_callback(event):
     if timer:
         timer.cancel()
         timer = None
+    speak_start_thinking()
     with BytesIOWithClose() as bio:
         out_f = wave.Wave_write(bio)
         out_f.setnchannels(1)
