@@ -18,6 +18,8 @@ from secret import OPENAI_API_KEY
 from describing.describe import DescribeImage
 from describing.image_processing import ImageProcessing
 
+import change_image
+
 print('init node')
 rospy.init_node('morsai')
 rospy.loginfo('Start MORSAI')
@@ -54,6 +56,15 @@ get_battery_voltage() - получить напряжение батареи в 
 get_pitch() - получить угол по тангажу в радинах.
 get_roll() - получить угол по крену в радианах.
 get_yaw() - получить угол по рысканью в радианах.
+image_change(number) - изменить изображение на камере на голове робота-собаки, список существующих изображений: 
+        1: 'attention',
+        2: 'default',
+        3: 'happy',
+        4: 'happy', 
+        5: 'laying',
+        6: 'sad',
+        7: 'sleeping',
+        8: 'thinking'.
 Считай, что функции для управления роботом уже объявлены.
 Максимальная скорость движения робота по x - 0.5 м/с, а по y - 0.2 м/с, по yaw - 0.85 рад/с.
 Для расчета времени поворота используй формулу в коде.
@@ -171,6 +182,9 @@ def publish_cmd_vel(event):
     cmd_pose_pub.publish(cmd_pose)
     status_pub.publish(True)
 
+def image_change(number):
+    change_image.image_change(number)
+
 
 publish_timer = rospy.Timer(rospy.Duration(1 / 50), publish_cmd_vel)
 
@@ -181,7 +195,7 @@ def do_command(prompt):
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
             'get_pitch': get_pitch, 'get_roll': get_roll, 'get_yaw': get_yaw, 'sit': sit, 'stand': stand,
-            'give_hand': give_hand, 'wave_hand': wave_hand, "get_description": get_description}
+            'give_hand': give_hand, 'wave_hand': wave_hand, "get_description": get_description, "image_change": image_change}
     exec(program, g)
 
 

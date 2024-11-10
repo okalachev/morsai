@@ -106,6 +106,8 @@ def timer_callback(event):
         print(reco)
         voice_command_pub.publish(reco)
 
+    image_change(2)
+
 
 
 rospy.Timer(rospy.Duration(0.2), timer_callback)
