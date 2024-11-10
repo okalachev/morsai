@@ -8,6 +8,7 @@ from secret import OPENAI_API_KEY
 
 
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openai.batalov.me/v1")
+print('wait for playSound')
 rospy.wait_for_service('playSound')
 service_playSound = rospy.ServiceProxy('playSound', playSound, persistent=True)
 
