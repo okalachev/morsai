@@ -60,7 +60,7 @@ image_change(number) - изменить изображение на камере
         1: 'attention',
         2: 'default',
         3: 'happy',
-        4: 'happy', 
+        4: 'barking', 
         5: 'laying',
         6: 'sad',
         7: 'sleeping',
