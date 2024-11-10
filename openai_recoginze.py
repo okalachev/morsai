@@ -11,6 +11,7 @@ import time
 from copy import copy
 
 from speak import speak_start_thinking
+from change_image import change_image
 
 import wave
 
@@ -86,6 +87,7 @@ def timer_callback(event):
         timer.cancel()
         timer = None
     speak_start_thinking()
+    change_image(8)
     with BytesIOWithClose() as bio:
         out_f = wave.Wave_write(bio)
         out_f.setnchannels(1)
