@@ -1,7 +1,3 @@
-import cv2
-import base64
-import openai
-
 from secret import OPENAI_API_KEY
 from describe import DescribeImage
 from image_processing import ImageProcessing
