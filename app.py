@@ -182,7 +182,7 @@ publish_timer = rospy.Timer(rospy.Duration(1 / 50), publish_cmd_vel)
 
 def do_command(prompt):
     program = gpt(prompt)
-    prompt = prompt.replace("```python", "").replace("```", "")
+    program = program.replace("```python", "").replace("```", "")
     program = 'import time\n' + program
     print(program)
     g = {'set_velocity': set_velocity, 'speak': speak, 'get_battery_voltage': get_battery_voltage,
